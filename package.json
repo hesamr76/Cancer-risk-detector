@@ -1,8 +1,8 @@
 {
   "name": "cancer-risk",
   "version": "0.0.1",
-  "description": "A Quasar Framework app",
-  "productName": "Quasar App",
+  "description": "Breast cancer risk assessment",
+  "productName": "Breast cancer risk assessment",
   "author": "hesamr76@gmail.com",
   "private": true,
   "scripts": {
