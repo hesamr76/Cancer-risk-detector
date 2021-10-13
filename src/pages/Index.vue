@@ -162,6 +162,8 @@ export default {
 
   data() {
     return {
+      dialog: null,
+      interval: null,
       loading: false,
 
       step: 1,
@@ -324,11 +326,11 @@ export default {
         },
         {
           label: this.$t("moreThanOne"),
-          value: 2
+          value: 3
         },
         {
           label: this.$t("unknown"),
-          value: 3
+          value: 4
         }
       ]
     };
@@ -364,12 +366,13 @@ export default {
     },
 
     calculateRisk() {
-      this.loading = true;
-      setTimeout(() => {
-        this.loading = false;
-      }, 750);
+      this.showDialog();
+      this.simulateProgress();
+      this.sendRequest();
+    },
 
-      const dialog = this.$q.dialog({
+    showDialog() {
+      this.dialog = this.$q.dialog({
         title: this.$t("calculating"),
         dark: false,
         message: "0%",
@@ -380,29 +383,47 @@ export default {
         persistent: true, // we want the user to not be able to close it
         ok: false // we want the user to not be able to close it
       });
+    },
 
-      // we simulate some progress here...
+    simulateProgress() {
       let percentage = 0;
-      const interval = setInterval(() => {
-        percentage = Math.min(100, percentage + Math.floor(Math.random() * 22));
+
+      this.interval = setInterval(() => {
+        percentage = Math.min(99, percentage + Math.floor(Math.random() * 7));
 
         // we update the dialog
-        dialog.update({
+        this.dialog.update({
           message: `${percentage}%`
         });
+      }, 200);
+    },
 
-        // if we are done...
-        if (percentage === 100) {
-          clearInterval(interval);
-          const result = Math.floor(Math.random() * 100);
-          dialog.update({
-            title: this.$t("success"),
-            message: this.$t("result", { result }),
-            progress: false,
-            ok: true
-          });
+    sendRequest() {
+      this.loading = true;
+
+      const body = {};
+
+      const callback = (res, result) => {
+        this.loading = false;
+        clearInterval(this.interval);
+
+        let message = result;
+        let title = this.$t("failed");
+
+        if (res) {
+          title = this.$t("success");
+          message = this.$t("result", { result });
         }
-      }, 500);
+
+        this.dialog.update({
+          title,
+          message,
+          progress: false,
+          ok: true
+        });
+      };
+
+      this.$store.dispatch("app/evaluate", { body, callback });
     }
   }
 };
