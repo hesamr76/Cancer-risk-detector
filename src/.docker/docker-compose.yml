@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  front:
+    build:
+      context: ../
+      dockerfile: ./.docker/Dockerfile
+    image: front
+    container_name: front
+    restart: always
+    ports:
+      - "5000:80"
